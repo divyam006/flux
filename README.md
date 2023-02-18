@@ -26,9 +26,7 @@ kubectl create ns flux
 
 $GHUSER = "divyam006"
 fluxctl install `
---git-user=${GHUSER} `
---git-email=${GHUSER}@users.noreply.github.com `
---git-url=git@github.com:${GHUSER}/flux `
+--git-url=git@github.com:divyam006/flux `
 --git-path=Yamls `
 --git-branch=main `
 --namespace=flux | kubectl apply -f -
@@ -47,3 +45,66 @@ fluxctl sync
 
 fluxctl policy -w default:deployment/example-deploy --tag "example-app=1.0.*"
 ```
+
+
+
+
+===================
+Examples:
+  # Check prerequisites
+  flux check --pre
+
+  # Install the latest version of Flux
+  flux install
+
+  # Create a source for a public Git repository
+  flux create source git nginx-latest `
+   --url=https://github.com/divyam006/flux `
+   --branch=main `
+   --interval=3m
+
+  # List GitRepository sources and their status
+  flux get sources git
+
+  # Trigger a GitRepository source reconciliation
+  flux reconcile source git flux-system
+
+  # Export GitRepository sources in YAML format
+  flux export source git --all > sources.yaml
+
+  # Create a Kustomization for deploying a series of microservices
+  flux create kustomization webapp-dev \
+    --source=webapp-latest \
+    --path="./deploy/webapp/" \
+    --prune=true \
+    --interval=5m \
+    --health-check="Deployment/backend.webapp" \
+    --health-check="Deployment/frontend.webapp" \
+    --health-check-timeout=2m
+
+  # Trigger a git sync of the Kustomization's source and apply changes
+  flux reconcile kustomization webapp-dev --with-source
+
+  # Suspend a Kustomization reconciliation
+  flux suspend kustomization webapp-dev
+
+  # Export Kustomizations in YAML format
+  flux export kustomization --all > kustomizations.yaml
+
+  # Resume a Kustomization reconciliation
+  flux resume kustomization webapp-dev
+
+  # Delete a Kustomization
+  flux delete kustomization webapp-dev
+
+  # Delete a GitRepository source
+  flux delete source git webapp-latest
+
+  # Uninstall Flux and delete CRDs
+  flux uninstall
+
+
+  --------------
+  https://fluxcd.io/flux/installation/
+
+kubectl delete --all daemonsets,replicasets,services,deployments,pods,rc,ingress -n argocd
